@@ -9,7 +9,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-// import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -41,6 +41,32 @@ public class TaskController {
 	@PostMapping("/tasks")
 	public Task createTask(@RequestBody Task task) {
 		return taskRepository.save(task);
+	}
+
+	@PatchMapping("/tasks/{id}")
+	public ResponseEntity<Task> patchTask(@PathVariable(value = "id") UUID taskId,
+			@RequestBody Map<String, String> taskDetails) throws Exception {
+		Task task = taskRepository.findById(taskId).orElseThrow(() -> new Exception("Task " + taskId + " not found"));
+
+		final Task updatedTask = taskRepository.save(task);
+
+		if (taskDetails.containsKey("dueDate"))
+			task.setTitle(taskDetails.get("dueDate"));
+		if (taskDetails.containsKey("title"))
+			task.setTitle(taskDetails.get("title"));
+		if (taskDetails.containsKey("description"))
+			task.setTitle(taskDetails.get("description"));
+		if (taskDetails.containsKey("status")) {
+			String newStatus = taskDetails.get("status");
+			task.setTitle(newStatus);
+			if (newStatus.equals("RESOLVED")) {
+				task.setResolvedAt(LocalDateTime.now());
+			}
+		}
+		if (taskDetails.containsKey("priority"))
+			task.setTitle(taskDetails.get("priority"));
+
+		return ResponseEntity.ok(updatedTask);
 	}
 
 	@PutMapping("/tasks/{id}")
