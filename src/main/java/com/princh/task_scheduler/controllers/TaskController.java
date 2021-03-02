@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +19,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.princh.task_scheduler.errors.api.InvalidRequestBodyException;
+import com.princh.task_scheduler.errors.api.ResourceNotFoundException;
 import com.princh.task_scheduler.models.TaskModel.Task;
 import com.princh.task_scheduler.models.TaskModel.TaskRepository;
+import com.princh.task_scheduler.util.Tasks.Status;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -34,57 +38,86 @@ public class TaskController {
 
 	@GetMapping("/tasks/{id}")
 	public ResponseEntity<Task> getTaskById(@PathVariable(value = "id") UUID taskId) throws Exception {
-		Task task = taskRepository.findById(taskId).orElseThrow(() -> new Exception("Task " + taskId + " not found"));
+		Task task = taskRepository.findById(taskId)
+				.orElseThrow(() -> new ResourceNotFoundException("Task " + taskId + " not found"));
 		return ResponseEntity.ok().body(task);
 	}
 
 	@PostMapping("/tasks")
-	public Task createTask(@RequestBody Task task) {
-		return taskRepository.save(task);
+	public Task createTask(@Valid @RequestBody Task task) throws Exception {
+		Task createdTask;
+		createdTask = taskRepository.save(task);
+
+		if (!createdTask.setPriority(task.getPriority())) {
+			throw new InvalidRequestBodyException(task.getPriority() + " is not a valid priority");
+		}
+		if (!createdTask.setStatus(task.getStatus())) {
+			throw new InvalidRequestBodyException(task.getStatus() + " is not a valid status");
+		}
+
+		return createdTask;
 	}
 
 	@PatchMapping("/tasks/{id}")
 	public ResponseEntity<Task> patchTask(@PathVariable(value = "id") UUID taskId,
 			@RequestBody Map<String, String> taskDetails) throws Exception {
-		Task task = taskRepository.findById(taskId).orElseThrow(() -> new Exception("Task " + taskId + " not found"));
-
-		final Task updatedTask = taskRepository.save(task);
+		Task task = taskRepository.findById(taskId)
+				.orElseThrow(() -> new ResourceNotFoundException("Task " + taskId + " not found"));
 
 		if (taskDetails.containsKey("dueDate"))
-			task.setTitle(taskDetails.get("dueDate"));
+			task.setDueDate(LocalDateTime.parse(taskDetails.get("dueDate")));
+
 		if (taskDetails.containsKey("title"))
 			task.setTitle(taskDetails.get("title"));
+
 		if (taskDetails.containsKey("description"))
-			task.setTitle(taskDetails.get("description"));
+			task.setDescription(taskDetails.get("description"));
+
 		if (taskDetails.containsKey("status")) {
 			String newStatus = taskDetails.get("status");
-			task.setTitle(newStatus);
-			if (newStatus.equals("RESOLVED")) {
+			if (!task.setStatus(newStatus)) {
+
+				throw new InvalidRequestBodyException(taskDetails.get("status") + " is not a valid status");
+			}
+			if (newStatus.equals(Status.RESOLVED.label)) {
 				task.setResolvedAt(LocalDateTime.now());
 			}
 		}
-		if (taskDetails.containsKey("priority"))
-			task.setTitle(taskDetails.get("priority"));
+
+		if (taskDetails.containsKey("priority")) {
+			if (!task.setPriority(taskDetails.get("priority"))) {
+				throw new InvalidRequestBodyException(taskDetails.get("priority") + " is not a valid priority");
+			}
+		}
+
+		final Task updatedTask = taskRepository.save(task);
 
 		return ResponseEntity.ok(updatedTask);
 	}
 
 	@PutMapping("/tasks/{id}")
-	public ResponseEntity<Task> updateTask(@PathVariable(value = "id") UUID taskId, @RequestBody Task taskDetails)
-			throws Exception {
-		Task task = taskRepository.findById(taskId).orElseThrow(() -> new Exception("Task " + taskId + " not found"));
+	public ResponseEntity<Task> updateTask(@PathVariable(value = "id") UUID taskId,
+			@Valid @RequestBody Task taskDetails) throws Exception {
+		Task task = taskRepository.findById(taskId)
+				.orElseThrow(() -> new ResourceNotFoundException("Task " + taskId + " not found"));
 
 		String newStatus = taskDetails.getStatus();
 
-		if (newStatus.equals("RESOLVED")) {
+		if (newStatus.equals(Status.RESOLVED.label)) {
 			task.setResolvedAt(LocalDateTime.now());
 		}
 
 		task.setDueDate(taskDetails.getDueDate());
 		task.setTitle(taskDetails.getTitle());
 		task.setDescription(taskDetails.getDescription());
-		task.setStatus(taskDetails.getStatus());
-		task.setPriority(taskDetails.getPriority());
+
+		if (!task.setStatus(taskDetails.getStatus())) {
+			throw new InvalidRequestBodyException(taskDetails.getStatus() + " is not a valid status");
+		}
+
+		if (!task.setPriority(taskDetails.getPriority())) {
+			throw new InvalidRequestBodyException(taskDetails.getPriority() + " is not a valid priority");
+		}
 
 		final Task updatedTask = taskRepository.save(task);
 		return ResponseEntity.ok(updatedTask);
@@ -92,7 +125,8 @@ public class TaskController {
 
 	@DeleteMapping("/tasks/{id}")
 	public Map<String, Boolean> deleteTask(@PathVariable(value = "id") UUID taskId) throws Exception {
-		Task task = taskRepository.findById(taskId).orElseThrow(() -> new Exception("Task " + taskId + " not found"));
+		Task task = taskRepository.findById(taskId)
+				.orElseThrow(() -> new ResourceNotFoundException("Task " + taskId + " not found"));
 
 		taskRepository.delete(task);
 		Map<String, Boolean> response = new HashMap<>();

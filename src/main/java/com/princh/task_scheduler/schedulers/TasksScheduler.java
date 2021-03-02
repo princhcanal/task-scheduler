@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 import com.princh.task_scheduler.models.TaskModel.Task;
 import com.princh.task_scheduler.models.TaskModel.TaskRepository;
+import com.princh.task_scheduler.util.Tasks.Status;
+import com.princh.task_scheduler.util.Tasks.Priority;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,8 +37,14 @@ public class TasksScheduler {
 		task.setDueDate(LocalDateTime.now().plusDays(7));
 		task.setTitle("Task " + count);
 		task.setDescription("This is task " + count);
-		task.setStatus("Unfinished");
-		task.setPriority("Low");
+
+		try {
+			task.setStatus(Status.QUEUED.label);
+			task.setPriority(Priority.LOW.label);
+		} catch (Exception e) {
+
+		}
+
 		taskRepository.save(task);
 
 		log.info("Task " + task.getTitle() + " created");
