@@ -7,13 +7,16 @@ import java.util.UUID;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.princh.task_scheduler.errors.api.InvalidRequestBodyException;
+import com.princh.task_scheduler.util.Tasks.Priority;
+import com.princh.task_scheduler.util.Tasks.Status;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "Tasks")
-public class Task {
+public class Task implements ITask {
 
 	@Id
 	@GeneratedValue
@@ -42,11 +45,11 @@ public class Task {
 	@Column(name = "description", nullable = false)
 	private String description;
 
-	@Column(name = "priority", nullable = false)
-	private String priority;
-
 	@Column(name = "status", nullable = false)
 	private String status;
+
+	@Column(name = "priority", nullable = false)
+	private String priority;
 
 	public Task() {
 	}
@@ -55,24 +58,12 @@ public class Task {
 		return this.id;
 	}
 
-	public void setId(UUID id) {
-		this.id = id;
-	}
-
 	public Date getCreatedAt() {
 		return this.createdAt;
 	}
 
-	public void setCreatedAt(Date createdAt) {
-		this.createdAt = createdAt;
-	}
-
 	public Date getUpdatedAt() {
 		return this.updatedAt;
-	}
-
-	public void setUpdatedAt(Date updatedAt) {
-		this.updatedAt = updatedAt;
 	}
 
 	public LocalDateTime getDueDate() {
@@ -111,16 +102,28 @@ public class Task {
 		return this.priority;
 	}
 
-	public void setPriority(String priority) {
-		this.priority = priority;
-	}
-
 	public String getStatus() {
 		return this.status;
 	}
 
-	public void setStatus(String status) {
-		this.status = status;
+	public boolean setStatus(String status) {
+		for (Status s : Status.values()) {
+			if (s.name().equals(status)) {
+				this.status = status;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean setPriority(String priority) {
+		for (Priority p : Priority.values()) {
+			if (p.name().equals(priority)) {
+				this.priority = priority;
+				return true;
+			}
+		}
+		return false;
 	}
 
 }
