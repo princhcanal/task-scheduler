@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.princh.task_scheduler.errors.api.InvalidDateFormatException;
 import com.princh.task_scheduler.errors.api.InvalidRequestBodyException;
 import com.princh.task_scheduler.errors.api.ResourceNotFoundException;
 import com.princh.task_scheduler.models.TaskModel.Task;
@@ -45,15 +46,18 @@ public class TaskController {
 
 	@PostMapping("/tasks")
 	public Task createTask(@Valid @RequestBody Task task) throws Exception {
-		Task createdTask;
-		createdTask = taskRepository.save(task);
+		Task createdTask = new Task();
 
-		if (!createdTask.setPriority(task.getPriority())) {
-			throw new InvalidRequestBodyException(task.getPriority() + " is not a valid priority");
+		String priority = task.getPriority();
+		String status = task.getStatus();
+		if (!createdTask.setPriority(priority)) {
+			throw new InvalidRequestBodyException(priority + " is not a valid priority");
 		}
-		if (!createdTask.setStatus(task.getStatus())) {
-			throw new InvalidRequestBodyException(task.getStatus() + " is not a valid status");
+		if (!createdTask.setStatus(status)) {
+			throw new InvalidRequestBodyException(status + " is not a valid status");
 		}
+
+		createdTask = taskRepository.save(task);
 
 		return createdTask;
 	}
