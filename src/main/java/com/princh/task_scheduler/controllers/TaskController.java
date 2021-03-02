@@ -1,6 +1,6 @@
 package com.princh.task_scheduler.controllers;
 
-import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +9,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
+// import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -48,6 +48,13 @@ public class TaskController {
 			throws Exception {
 		Task task = taskRepository.findById(taskId).orElseThrow(() -> new Exception("Task " + taskId + " not found"));
 
+		String newStatus = taskDetails.getStatus();
+
+		if (newStatus.equals("RESOLVED")) {
+			task.setResolvedAt(LocalDateTime.now());
+		}
+
+		task.setDueDate(taskDetails.getDueDate());
 		task.setTitle(taskDetails.getTitle());
 		task.setDescription(taskDetails.getDescription());
 		task.setStatus(taskDetails.getStatus());

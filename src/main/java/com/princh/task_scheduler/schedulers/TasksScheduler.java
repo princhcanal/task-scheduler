@@ -1,7 +1,6 @@
 package com.princh.task_scheduler.schedulers;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import com.princh.task_scheduler.models.TaskModel.Task;
 import com.princh.task_scheduler.models.TaskModel.TaskRepository;
@@ -13,7 +12,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ScheduledTasks {
+public class TasksScheduler {
 	@Autowired
 	private TaskRepository taskRepository;
 
@@ -21,20 +20,19 @@ public class ScheduledTasks {
 	private int numTasksPerInterval = 5;
 	public static int count = 0;
 
-	private static final Logger log = LoggerFactory.getLogger(ScheduledTasks.class);
-
-	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+	private static final Logger log = LoggerFactory.getLogger(TasksScheduler.class);
 
 	@Scheduled(fixedRate = intervalLength)
 	public void createMultipleTasks() {
 		for (int i = 0; i < numTasksPerInterval; i++) {
-			createTask();
+			// createTask();
 		}
 	}
 
 	public void createTask() {
 		Task task = new Task();
 
+		task.setDueDate(LocalDateTime.now().plusDays(7));
 		task.setTitle("Task " + count);
 		task.setDescription("This is task " + count);
 		task.setStatus("Unfinished");
