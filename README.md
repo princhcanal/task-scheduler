@@ -16,13 +16,15 @@
 
 ## `GET /tasks`
 
-Gets all tasks in order by due date
+Gets all tasks in order by createdAt date
 
 ### Param Options:
 
 #### desc: tasks are reversed if set to 'true'
 
-#### sortBy: tasks are sorted by priority from HIGH to LOW if set to 'priority'
+#### sortBy: 'priority' orders tasks from HIGH to LOW
+
+#### sortBy: 'dueDate' orders tasks from earliest to latest due date
 
 ## `GET /tasks/:id`
 

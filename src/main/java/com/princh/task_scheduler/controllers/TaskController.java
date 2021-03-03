@@ -39,11 +39,17 @@ public class TaskController {
 	@GetMapping("/tasks")
 	public List<Task> getAllTasks(@RequestParam(name = "desc", required = false) String isDescending,
 			@RequestParam(name = "sortBy", required = false) String sortBy) {
-		List<Task> tasks = taskRepository.findAllOrderByDueDate();
+		// default ordering is by createdAt date
+		List<Task> tasks = taskRepository.findAll();
 
-		if (sortBy != null && sortBy.equals("priority")) {
-			// sort by priority from HIGH to LOW
-			tasks = taskRepository.findAllOrderByPriority();
+		if (sortBy != null) {
+			if (sortBy.equals("priority")) {
+				// sort by priority from HIGH to LOW
+				tasks = taskRepository.findAllOrderByPriority();
+			} else if (sortBy.equals("dueDate")) {
+				// sort by dueDate from earliest to latest
+				tasks = taskRepository.findAllOrderByDueDate();
+			}
 		}
 
 		if (isDescending != null && isDescending.equals("true")) {
