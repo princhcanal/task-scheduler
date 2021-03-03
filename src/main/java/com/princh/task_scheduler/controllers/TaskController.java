@@ -60,6 +60,9 @@ public class TaskController {
 	}
 
 	@PostMapping("/tasks")
+	// Don't know how to handle these exceptions :(
+	// FIXME: LocalDateTimeException on invalid dueDate
+	// FIXME: PropertyValueException on null values in Task
 	public Task createTask(@Valid @RequestBody Task task) throws Exception {
 		Task createdTask = new Task();
 

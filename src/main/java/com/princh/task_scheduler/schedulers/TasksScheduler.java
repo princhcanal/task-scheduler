@@ -28,7 +28,7 @@ public class TasksScheduler {
 	@Scheduled(fixedRate = intervalLength)
 	public void createMultipleTasks() {
 		for (int i = 0; i < numTasksPerInterval; i++) {
-			// createTask();
+			createTask();
 		}
 	}
 
@@ -41,7 +41,7 @@ public class TasksScheduler {
 		log.info("Title: " + task.getTitle());
 		log.info("Description: " + task.getDescription());
 		log.info("Status: " + task.getStatus());
-		log.info("Priority" + task.getPriority());
+		log.info("Priority: " + task.getPriority());
 	}
 
 	public void setNumTasksPerInterval(int numTasksPerInterval) {
