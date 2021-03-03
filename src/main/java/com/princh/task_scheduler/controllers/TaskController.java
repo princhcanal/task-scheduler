@@ -42,10 +42,12 @@ public class TaskController {
 		List<Task> tasks = taskRepository.findAllOrderByDueDate();
 
 		if (sortBy != null && sortBy.equals("priority")) {
+			// sort by priority from HIGH to LOW
 			tasks = taskRepository.findAllOrderByPriority();
 		}
 
 		if (isDescending != null && isDescending.equals("true")) {
+			// reverse sort
 			Collections.reverse(tasks);
 		}
 
@@ -85,6 +87,7 @@ public class TaskController {
 	}
 
 	@PatchMapping("/tasks/{id}")
+	// Not sure if this is the proper way to handle a patch request in Spring
 	public ResponseEntity<Task> patchTask(@PathVariable(value = "id") UUID taskId,
 			@RequestBody Map<String, String> taskDetails) throws Exception {
 		Task task = taskRepository.findById(taskId)
@@ -105,9 +108,9 @@ public class TaskController {
 			task.setDescription(taskDetails.get("description"));
 
 		if (taskDetails.containsKey("status")) {
+			// sets resolved date if status updated to RESOLVE
 			String newStatus = taskDetails.get("status");
 			if (!task.setStatus(newStatus)) {
-
 				throw new InvalidRequestBodyException(taskDetails.get("status") + " is not a valid status");
 			}
 			if (newStatus.equals(Status.RESOLVED.label)) {

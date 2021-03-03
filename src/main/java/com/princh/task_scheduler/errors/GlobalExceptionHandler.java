@@ -12,6 +12,7 @@ import com.princh.task_scheduler.errors.api.InvalidDateFormatException;
 import com.princh.task_scheduler.errors.api.InvalidRequestBodyException;
 import com.princh.task_scheduler.errors.api.ResourceNotFoundException;
 
+// sets up api exceptions to return DTO with fields of ExceptionResponse
 @ControllerAdvice
 public class GlobalExceptionHandler {
 

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+// sets fields for exception responses
 public class ExceptionResponse {
 
 	private String errorMessage;

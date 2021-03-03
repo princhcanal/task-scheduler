@@ -4,9 +4,6 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 
-import com.princh.task_scheduler.util.Tasks.Priority;
-import com.princh.task_scheduler.util.Tasks.Status;
-
 public interface ITask {
 	UUID getId();
 
