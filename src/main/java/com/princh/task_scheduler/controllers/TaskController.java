@@ -112,34 +112,6 @@ public class TaskController {
 		return ResponseEntity.ok(updatedTask);
 	}
 
-	@PutMapping("/tasks/{id}")
-	public ResponseEntity<Task> updateTask(@PathVariable(value = "id") UUID taskId,
-			@Valid @RequestBody Task taskDetails) throws Exception {
-		Task task = taskRepository.findById(taskId)
-				.orElseThrow(() -> new ResourceNotFoundException("Task " + taskId + " not found"));
-
-		String newStatus = taskDetails.getStatus();
-
-		if (newStatus.equals(Status.RESOLVED.label)) {
-			task.setResolvedAt(LocalDateTime.now());
-		}
-
-		task.setDueDate(taskDetails.getDueDate());
-		task.setTitle(taskDetails.getTitle());
-		task.setDescription(taskDetails.getDescription());
-
-		if (!task.setStatus(taskDetails.getStatus())) {
-			throw new InvalidRequestBodyException(taskDetails.getStatus() + " is not a valid status");
-		}
-
-		if (!task.setPriority(taskDetails.getPriority())) {
-			throw new InvalidRequestBodyException(taskDetails.getPriority() + " is not a valid priority");
-		}
-
-		final Task updatedTask = taskRepository.save(task);
-		return ResponseEntity.ok(updatedTask);
-	}
-
 	@DeleteMapping("/tasks/{id}")
 	public Map<String, Boolean> deleteTask(@PathVariable(value = "id") UUID taskId) throws Exception {
 		Task task = taskRepository.findById(taskId)
