@@ -2,10 +2,12 @@ package com.princh.task_scheduler.schedulers;
 
 import java.time.LocalDateTime;
 
+import com.princh.task_scheduler.errors.api.InvalidDateFormatException;
 import com.princh.task_scheduler.models.TaskModel.Task;
 import com.princh.task_scheduler.models.TaskModel.TaskRepository;
 import com.princh.task_scheduler.util.Tasks.Status;
 import com.princh.task_scheduler.util.Tasks.Priority;
+import com.princh.task_scheduler.util.Tasks.RandomTaskGenerator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +22,6 @@ public class TasksScheduler {
 
 	private final int intervalLength = 15000;
 	private int numTasksPerInterval = 5;
-	public static int count = 0;
 
 	private static final Logger log = LoggerFactory.getLogger(TasksScheduler.class);
 
@@ -32,23 +33,15 @@ public class TasksScheduler {
 	}
 
 	public void createTask() {
-		Task task = new Task();
-
-		task.setDueDate(LocalDateTime.now().plusDays(7));
-		task.setTitle("Task " + count);
-		task.setDescription("This is task " + count);
-
-		try {
-			task.setStatus(Status.QUEUED.label);
-			task.setPriority(Priority.LOW.label);
-		} catch (Exception e) {
-
-		}
-
+		Task task = RandomTaskGenerator.generateRandomTask();
 		taskRepository.save(task);
 
-		log.info("Task " + task.getTitle() + " created");
-		count++;
+		log.info("=====New Task Created=====");
+		log.info("Due date: " + task.getDueDate().toString());
+		log.info("Title: " + task.getTitle());
+		log.info("Description: " + task.getDescription());
+		log.info("Status: " + task.getStatus());
+		log.info("Priority" + task.getPriority());
 	}
 
 	public void setNumTasksPerInterval(int numTasksPerInterval) {
