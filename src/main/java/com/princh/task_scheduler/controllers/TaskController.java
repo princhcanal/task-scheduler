@@ -1,6 +1,8 @@
 package com.princh.task_scheduler.controllers;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,6 +34,7 @@ import com.princh.task_scheduler.util.Tasks.Status;
 public class TaskController {
 	@Autowired
 	private TaskRepository taskRepository;
+	public DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss");
 
 	@GetMapping("/tasks")
 	public List<Task> getAllTasks(@RequestParam(name = "desc", required = false) String isDescending,
@@ -70,6 +72,10 @@ public class TaskController {
 			throw new InvalidRequestBodyException(status + " is not a valid status");
 		}
 
+		if (task.getStatus().equals(Status.RESOLVED.label)) {
+			task.setResolvedAt(LocalDateTime.now());
+		}
+
 		createdTask = taskRepository.save(task);
 
 		return createdTask;
@@ -81,8 +87,13 @@ public class TaskController {
 		Task task = taskRepository.findById(taskId)
 				.orElseThrow(() -> new ResourceNotFoundException("Task " + taskId + " not found"));
 
-		if (taskDetails.containsKey("dueDate"))
-			task.setDueDate(LocalDateTime.parse(taskDetails.get("dueDate")));
+		if (taskDetails.containsKey("dueDate")) {
+			try {
+				task.setDueDate(LocalDateTime.parse(taskDetails.get("dueDate"), formatter));
+			} catch (DateTimeParseException e) {
+				throw new InvalidDateFormatException("Date format must be MM-dd-yyyy HH:mm:ss");
+			}
+		}
 
 		if (taskDetails.containsKey("title"))
 			task.setTitle(taskDetails.get("title"));

@@ -16,7 +16,7 @@ public interface ITask {
 
 	LocalDateTime getDueDate();
 
-	void setDueDate(LocalDateTime dueDate);
+	boolean setDueDate(LocalDateTime dueDate) throws Exception;
 
 	LocalDateTime getResolvedAt();
 

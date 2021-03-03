@@ -1,13 +1,13 @@
 package com.princh.task_scheduler.models.TaskModel;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.UUID;
 
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.princh.task_scheduler.errors.api.InvalidRequestBodyException;
 import com.princh.task_scheduler.util.Tasks.Priority;
 import com.princh.task_scheduler.util.Tasks.Status;
 
@@ -70,8 +70,13 @@ public class Task implements ITask {
 		return this.dueDate;
 	}
 
-	public void setDueDate(LocalDateTime dueDate) {
-		this.dueDate = dueDate;
+	public boolean setDueDate(LocalDateTime dueDate) throws DateTimeParseException {
+		try {
+			this.dueDate = dueDate;
+		} catch (DateTimeParseException e) {
+			return false;
+		}
+		return true;
 	}
 
 	public LocalDateTime getResolvedAt() {
