@@ -1,6 +1,7 @@
 package com.princh.task_scheduler.controllers;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.princh.task_scheduler.errors.api.InvalidDateFormatException;
@@ -33,8 +35,19 @@ public class TaskController {
 	private TaskRepository taskRepository;
 
 	@GetMapping("/tasks")
-	public List<Task> getAllTasks() {
-		return taskRepository.findAll();
+	public List<Task> getAllTasks(@RequestParam(name = "desc", required = false) String isDescending,
+			@RequestParam(name = "sortBy", required = false) String sortBy) {
+		List<Task> tasks = taskRepository.findAllOrderByDueDate();
+
+		if (sortBy != null && sortBy.equals("priority")) {
+			tasks = taskRepository.findAllOrderByPriority();
+		}
+
+		if (isDescending != null && isDescending.equals("true")) {
+			Collections.reverse(tasks);
+		}
+
+		return tasks;
 	}
 
 	@GetMapping("/tasks/{id}")
